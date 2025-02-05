@@ -34,6 +34,8 @@ public class Button {
         this.sprite = ImageIO.read(new File(path));
     }
 
+    public void onClick() {
 
+    }
 
 }
