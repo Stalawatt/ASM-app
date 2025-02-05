@@ -1,11 +1,15 @@
-import javax.swing.*;
-import java.awt.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class Button {
 
     public int x,y,w,h;
 
     public String text;
+
+    public BufferedImage sprite;
 
     public Button(int x, int y, int width, int height) {
         this.x = x;
@@ -24,6 +28,10 @@ public class Button {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public void loadSprite(String path) throws IOException {
+        this.sprite = ImageIO.read(new File(path));
     }
 
 
