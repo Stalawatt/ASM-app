@@ -1,8 +1,11 @@
+import javax.lang.model.type.NullType;
 import javax.swing.*;
 
 public class Window {
         public JFrame frame;
-        private final int width,height;
+
+        private int width = 0;
+        private int height = 0;
 
         public Window(int _width, int _height) {
 
@@ -17,8 +20,16 @@ public class Window {
 
         }
 
+        public Window() {
+            frame = new JFrame();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }
+
         public void renderFrame() {
             // render logic goes here
+
+
+
         }
 
 
