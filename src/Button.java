@@ -9,7 +9,6 @@ public class Button {
 
     public int x,y,w,h;
 
-    public String text;
 
     private BufferedImage sprite;
 
@@ -22,19 +21,16 @@ public class Button {
 
     }
 
-    public Button(String text, int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
-        this.w = width;
-        this.h = height;
-        this.text = text;
-    }
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public void loadSprite(String path) throws IOException {
         this.sprite = ImageIO.read(new File(path));
+    }
+
+    public int[] getPosition() {
+        return new int[]{x,y};
+    }
+
+    public int[] getDimensions () {
+        return new int[]{w,h};
     }
 
     public JPanel getSprite() {
@@ -48,10 +44,15 @@ public class Button {
         else {
             return new JPanel() {
                 public void paint(Graphics g) {
+                    g.setColor(Color.RED);
                     g.drawRect(x,y,w,h);
                 }
             };
         }
+    }
+
+    public void render(JFrame frame) {
+        frame.add(getSprite());
     }
 
     public void onClick() {

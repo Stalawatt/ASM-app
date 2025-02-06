@@ -1,34 +1,51 @@
-import javax.lang.model.type.NullType;
 import javax.swing.*;
+import java.awt.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Window {
         public JFrame frame;
 
-        private int width = 0;
-        private int height = 0;
+        // Colours
 
-        public Window(int _width, int _height) {
+        private Button LMC_button;
 
-            this.width = _width;
-            this.height = _height;
+        public Window(int w, int h, PageManager pageManager) {
+
 
             frame = new JFrame();
-            frame.setSize(width, height );
+            frame.setSize(w, h);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
 
+            this.LMC_button = new Button(100,100,150,100);
+
+            this.start(pageManager);
         }
 
-        public Window() {
-            frame = new JFrame();
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        }
-
-        public void renderFrame() {
+        public void renderFrame(PageManager pageManager) {
             // render logic goes here
 
+            JPanel[] toRender = pageManager.getPage().getToRender();
 
+            for (JPanel panel : toRender) {
+                frame.add(panel);
+            }
+
+            frame.repaint();
+
+        }
+
+        public void start(PageManager pageManager) {
+            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+            Runnable gameLoop = () -> {
+                this.renderFrame(pageManager);
+            };
+
+            executor.scheduleAtFixedRate(gameLoop, 0, 16, TimeUnit.MILLISECONDS);
 
         }
 
