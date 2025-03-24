@@ -3,7 +3,7 @@ package LMC_Interpreter;
 class Token {
 
     TokenType type;
-    int value;
+    Integer value = null;
 
     enum TokenType {
         LDA,      // LOAD

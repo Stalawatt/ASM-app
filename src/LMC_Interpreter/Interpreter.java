@@ -21,7 +21,7 @@ DAT - data storage
 public class Interpreter {
 
     // Stores the tokens
-    private static List<Token> buffer = new ArrayList<>();
+    private static final List<Token> buffer = new ArrayList<>();
     // Points to the current token
     private static int pointer = 0;
     // Points to the last token in the buffer
@@ -52,7 +52,7 @@ public class Interpreter {
 
         for (String line : lines) {
             for (String token : line.split(" ")) {
-                Token.TokenType tokenType = getTokenType(token);
+                Token.TokenType tokenType = getTokenType(token.toLowerCase());
                 if (tokenType == Token.TokenType.INT) {
                     buffer.add(new Token(tokenType, Integer.parseInt(token)));
                 } else {
@@ -98,6 +98,19 @@ public class Interpreter {
         pointer++;
     }
 
+    /**
+     * Resets the buffer and pointer
+     */
+    private static void resetBuffer() {
+        buffer.clear();
+        pointer = 0;
+    }
+
+    /**
+     * Takes in a token string, and returns the token type
+     * @param token The token string
+     * @return the token type
+     */
     private static Token.TokenType getTokenType(String token) {
         try {
             Integer.parseInt(token);
