@@ -23,41 +23,69 @@ public class Interpreter {
     // Stores the tokens
     private static final List<Token> buffer = new ArrayList<>();
     // Points to the current token
-    private static int pointer = 0;
+    public static int pointer = 0;
     // Points to the last token in the buffer
     private static int endPointer;
-    // Hashmap for labels
-    private static HashMap<String, Integer> labels = new HashMap<>();
-    // Memory for program
-    Memory memory = new Memory();
+    // Hashmap for labels - Token -> Pointer
+    private static final HashMap<Integer, Integer> labels = new HashMap<>();
 
 
     /**
      * Runs the interpreter
      * @param code The LMC code input string
      */
-    public static void Run(String code) {
+    public static void Run(String code) throws Exception {
+        Memory.init();
         // Fill buffer with tokens
         tokenize(code);
         // Set end pointer
         endPointer = buffer.size() - 1;
+
+        while (pointer < endPointer) {
+            Token token = buffer.get(pointer);
+            switch (token.type) {
+                case Token.TokenType.HLT -> Instructions.HALT();
+                case Token.TokenType.ADD -> Instructions.ADD(peek().getValue());
+                case Token.TokenType.SUB -> Instructions.SUB(peek().getValue());
+                case Token.TokenType.LDA -> Instructions.LOAD(peek().getValue());
+                case Token.TokenType.STA -> Instructions.STORE(peek().getValue());
+                case Token.TokenType.BRA -> Instructions.BRA(labels.get(token.getValue()));
+                case Token.TokenType.BRZ -> Instructions.BRZ(peek().getValue());
+                case Token.TokenType.BRP -> Instructions.BRP(peek().getValue());
+                case Token.TokenType.INP -> Instructions.INP();
+                case Token.TokenType.OUT -> Instructions.OUT();
+            }
+            pointer++;
+        }
     }
 
     /**
      * Fill the buffer with tokens
      * @param code the string of LMC code
      */
-    private static void tokenize(String code) {
+    private static void tokenize(String code) throws Exception {
         String[] lines = code.split("\n");
+
+        int p = 0;
+        int labelNumber = 0;
 
         for (String line : lines) {
             for (String token : line.split(" ")) {
                 Token.TokenType tokenType = getTokenType(token.toLowerCase());
                 if (tokenType == Token.TokenType.INT) {
                     buffer.add(new Token(tokenType, Integer.parseInt(token)));
+                } else if (
+                        tokenType == Token.TokenType.LABEL
+                        && (peekBack().type != Token.TokenType.BRA ||
+                        peekBack().type != Token.TokenType.BRZ ||
+                        peekBack().type != Token.TokenType.BRP)) {
+                  buffer.add(new Token(tokenType, labelNumber));
+                  labels.put(labelNumber, p);
+
                 } else {
                     buffer.add(new Token(tokenType));
                 }
+                p++;
             }
         }
 
@@ -73,6 +101,13 @@ public class Interpreter {
             throw new Exception("End of input reached");
         }
         return buffer.get(pointer + 1);
+    }
+
+    private static Token peekBack() throws Exception {
+        if (pointer <= 0) {
+            return new Token(Token.TokenType.UNDEFINED);
+        }
+        return buffer.get(pointer - 1);
     }
 
     /**
@@ -95,6 +130,7 @@ public class Interpreter {
         if (pointer + 1 > endPointer) {
             throw new Exception("End pointer exceeded in nextPointer");
         }
+        Memory.incrementProgramCounter();
         pointer++;
     }
 
@@ -127,6 +163,7 @@ public class Interpreter {
             case "inp" -> Token.TokenType.INP;
             case "out" -> Token.TokenType.OUT;
             case "hlt" -> Token.TokenType.HLT;
+            case "bra" -> Token.TokenType.BRA;
             case "brz" -> Token.TokenType.BRZ;
             case "brp" -> Token.TokenType.BRP;
             case "dat" -> Token.TokenType.DAT;

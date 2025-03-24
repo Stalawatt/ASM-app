@@ -19,11 +19,12 @@ class Token {
         DAT,      // DATA STORAGE
         INT,      // INT GIVEN BY USER
         LABEL,    // LABEL
-        UNDEFINED // ERROR
+        UNDEFINED // FOR ERRORS
     }
 
     public Token(TokenType type) {
         this.type = type;
+        this.value = null;
     }
     public Token(TokenType type, int value) {
         this.type = type;
@@ -33,7 +34,7 @@ class Token {
         return type;
     }
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 }
