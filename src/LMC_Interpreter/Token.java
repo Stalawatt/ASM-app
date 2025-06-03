@@ -3,7 +3,9 @@ package LMC_Interpreter;
 class Token {
 
     TokenType type;
-    Integer value = null;
+    Integer value;
+    String text;
+
 
     enum TokenType {
         LDA,      // LOAD
@@ -26,7 +28,7 @@ class Token {
         this.type = type;
         this.value = null;
     }
-    public Token(TokenType type, int value) {
+    public Token(TokenType type, int value, String text) {
         this.type = type;
         this.value = value;
     }
@@ -36,5 +38,14 @@ class Token {
 
     public Integer getValue() {
         return value;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public int hashCode() {
+
+        return 0;
     }
 }

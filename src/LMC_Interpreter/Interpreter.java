@@ -35,6 +35,7 @@ public class Interpreter {
      * @param code The LMC code input string
      */
     public static void Run(String code) throws Exception {
+        pointer = 0;
         Memory.init();
         // Fill buffer with tokens
         tokenize(code);
@@ -49,7 +50,7 @@ public class Interpreter {
                 case Token.TokenType.SUB -> Instructions.SUB(peek().getValue());
                 case Token.TokenType.LDA -> Instructions.LOAD(peek().getValue());
                 case Token.TokenType.STA -> Instructions.STORE(peek().getValue());
-                case Token.TokenType.BRA -> Instructions.BRA(labels.get(token.getValue()));
+                case Token.TokenType.BRA -> Instructions.BRA(labels.get(peek().getText().hashCode()));
                 case Token.TokenType.BRZ -> Instructions.BRZ(peek().getValue());
                 case Token.TokenType.BRP -> Instructions.BRP(peek().getValue());
                 case Token.TokenType.INP -> Instructions.INP();
@@ -57,6 +58,7 @@ public class Interpreter {
             }
             pointer++;
         }
+        System.exit(1);
     }
 
     /**
@@ -65,27 +67,56 @@ public class Interpreter {
      */
     private static void tokenize(String code) throws Exception {
         String[] lines = code.split("\n");
+        Token currentToken = null;
+        Token previousToken = null;
 
-        int p = 0;
-        int labelNumber = 0;
-
+        // Load labels into hashmap
         for (String line : lines) {
             for (String token : line.split(" ")) {
                 Token.TokenType tokenType = getTokenType(token.toLowerCase());
+                if (tokenType == Token.TokenType.LABEL
+                        && !(previousToken.getType() == Token.TokenType.BRA ||
+                        previousToken.getType() == Token.TokenType.BRZ ||
+                        previousToken.getType() == Token.TokenType.BRP)) {
+                    labels.put(token.hashCode(), pointer);
+                }
+                if (pointer != endPointer) {
+                    incrementPointer();
+                } else {
+                    pointer = 0;
+                }
+
+            }
+        }
+        pointer = 0;
+        for (String line : lines) {
+            for (String token : line.split(" ")) {
+
+                Token.TokenType tokenType = getTokenType(token.toLowerCase());
+
                 if (tokenType == Token.TokenType.INT) {
-                    buffer.add(new Token(tokenType, Integer.parseInt(token)));
-                } else if (
+                    buffer.add(new Token(tokenType, Integer.parseInt(token), token));
+                } else if ( // Create new label
                         tokenType == Token.TokenType.LABEL
-                        && (peekBack().type != Token.TokenType.BRA ||
-                        peekBack().type != Token.TokenType.BRZ ||
-                        peekBack().type != Token.TokenType.BRP)) {
-                  buffer.add(new Token(tokenType, labelNumber));
-                  labels.put(labelNumber, p);
+                                && !(previousToken.type == Token.TokenType.BRA ||
+                                previousToken.type == Token.TokenType.BRZ ||
+                                previousToken.type == Token.TokenType.BRP)) {
+                    currentToken = new Token(tokenType, labels.get(token.hashCode()), token);
+                    buffer.add(currentToken);
+                } else if ( // Call label
+                        tokenType == Token.TokenType.LABEL
+                                && (previousToken.type != Token.TokenType.BRA &&
+                                previousToken.type != Token.TokenType.BRZ &&
+                                previousToken.type != Token.TokenType.BRP)) {
+                    currentToken = new Token(tokenType, labels.get(token.hashCode()), token);
+                    buffer.add(currentToken);
 
                 } else {
                     buffer.add(new Token(tokenType));
                 }
-                p++;
+
+                previousToken = currentToken;
+
             }
         }
 

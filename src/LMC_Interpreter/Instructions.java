@@ -59,10 +59,12 @@ public class Instructions {
     public static void INP() {
         System.out.println("Enter Value : ");
         Memory.setAcc(Integer.parseInt(new Scanner(System.in).nextLine()));
+
     }
 
     public static void OUT() {
         System.out.println(Memory.getAcc());
     }
+
 
 }
