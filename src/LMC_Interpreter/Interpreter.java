@@ -16,18 +16,26 @@ BRZ - branch if zero
 BRA - branch unconditionally
 BRP - branch if zero or positive
 DAT - data storage
+
+Other token types :
+
+LABEL - labels for loops and branching
+VARIABLE - variables made via DAT
+NEWLINE - end of an instruction
 */
 
 public class Interpreter {
 
     // Stores the tokens
-    private static final List<Token> buffer = new ArrayList<>();
+    public static final List<Token> buffer = new ArrayList<>();
     // Points to the current token
     public static int pointer = 0;
     // Points to the last token in the buffer
     private static int endPointer;
-    // Hashmap for labels - Token -> Pointer
-    private static final HashMap<Integer, Integer> labels = new HashMap<>();
+    // Hashmap for labels - Token Name -> Pointer
+    public static final HashMap<String, Integer> labels = new HashMap<>();
+    // Hashmap for variables - Token Name -> Value
+    public static final HashMap<String, Integer> vars = new HashMap<>();
 
 
     /**
@@ -39,6 +47,8 @@ public class Interpreter {
         Memory.init();
         // Fill buffer with tokens
         tokenize(code);
+        // Fill memory
+        Memory.fill();
         // Set end pointer
         endPointer = buffer.size() - 1;
 
@@ -49,8 +59,8 @@ public class Interpreter {
                 case Token.TokenType.ADD -> Instructions.ADD(peek().getValue());
                 case Token.TokenType.SUB -> Instructions.SUB(peek().getValue());
                 case Token.TokenType.LDA -> Instructions.LOAD(peek().getValue());
-                case Token.TokenType.STA -> Instructions.STORE(peek().getValue());
-                case Token.TokenType.BRA -> Instructions.BRA(labels.get(peek().getText().hashCode()));
+                case Token.TokenType.STA -> Instructions.STORE(peek());
+                case Token.TokenType.BRA -> Instructions.BRA(peek().getValue());
                 case Token.TokenType.BRZ -> Instructions.BRZ(peek().getValue());
                 case Token.TokenType.BRP -> Instructions.BRP(peek().getValue());
                 case Token.TokenType.INP -> Instructions.INP();
@@ -66,61 +76,73 @@ public class Interpreter {
      * @param code the string of LMC code
      */
     private static void tokenize(String code) throws Exception {
-        String[] lines = code.split("\n");
-        Token currentToken = null;
-        Token previousToken = null;
 
-        // Load labels into hashmap
-        for (String line : lines) {
-            for (String token : line.split(" ")) {
-                Token.TokenType tokenType = getTokenType(token.toLowerCase());
-                if (tokenType == Token.TokenType.LABEL
-                        && !(previousToken.getType() == Token.TokenType.BRA ||
-                        previousToken.getType() == Token.TokenType.BRZ ||
-                        previousToken.getType() == Token.TokenType.BRP)) {
-                    labels.put(token.hashCode(), pointer);
+        code = code.toLowerCase(); // lowercase the code so that it is usable in getTokenType()
+
+        // Tokenize all instr in passed code, other than the labels and variables
+        for (String line : code.split("\n")) {
+            for (String word : line.split(" ")) {
+                Token nextToken = new Token(getTokenType(word));
+                // labels and variables are left as undefined for now, later categorised
+                // the word is saved into the token
+                if (nextToken.type == Token.TokenType.UNDEFINED) {
+                    nextToken.name = word;
                 }
-                if (pointer != endPointer) {
-                    incrementPointer();
-                } else {
-                    pointer = 0;
+
+
+                // if is an INT token, then add the int value to the token
+                if (nextToken.getType() == Token.TokenType.INT) {
+                    nextToken.value = Integer.parseInt(word);
                 }
+
+                buffer.add(nextToken);
 
             }
+            buffer.add(new Token(Token.TokenType.NEWLINE));
         }
-        pointer = 0;
-        for (String line : lines) {
-            for (String token : line.split(" ")) {
 
-                Token.TokenType tokenType = getTokenType(token.toLowerCase());
-
-                if (tokenType == Token.TokenType.INT) {
-                    buffer.add(new Token(tokenType, Integer.parseInt(token), token));
-                } else if ( // Create new label
-                        tokenType == Token.TokenType.LABEL
-                                && !(previousToken.type == Token.TokenType.BRA ||
-                                previousToken.type == Token.TokenType.BRZ ||
-                                previousToken.type == Token.TokenType.BRP)) {
-                    currentToken = new Token(tokenType, labels.get(token.hashCode()), token);
-                    buffer.add(currentToken);
-                } else if ( // Call label
-                        tokenType == Token.TokenType.LABEL
-                                && (previousToken.type != Token.TokenType.BRA &&
-                                previousToken.type != Token.TokenType.BRZ &&
-                                previousToken.type != Token.TokenType.BRP)) {
-                    currentToken = new Token(tokenType, labels.get(token.hashCode()), token);
-                    buffer.add(currentToken);
-
-                } else {
-                    buffer.add(new Token(tokenType));
+        // Scan for UNDEFINED tokens and assign label or variable
+        for (int i = 0; i < buffer.size(); i++) {
+            Token token = buffer.get(i);
+            if (token.type == Token.TokenType.UNDEFINED) {
+                if (i == 0) {
+                    token.type = Token.TokenType.LABEL;
+                    labels.put(token.name, i);
+                    continue;
                 }
 
-                previousToken = currentToken;
+                if (buffer.get(i + 1).getType() == Token.TokenType.DAT && buffer.get(i + 2).getType() == Token.TokenType.INT) { // variable DAT value
+                    token.type = Token.TokenType.VARIABLE;
+                    vars.put(token.name, buffer.get(i + 2).getValue());
 
+                } else if (buffer.get(i - 1).getType() == Token.TokenType.NEWLINE) { // NEWLINE LABEL <other instr>
+                    token.type = Token.TokenType.LABEL;
+                    labels.put(token.name, i);
+                }
+
+                switch(buffer.get(i-1).getType()){
+
+
+                    case Token.TokenType.ADD, Token.TokenType.BRA, Token.TokenType.BRZ, Token.TokenType.BRP,
+                         Token.TokenType.SUB:
+
+                        token.type = Token.TokenType.LABEL; break;
+
+
+                    case Token.TokenType.LDA, Token.TokenType.STA:
+
+                        token.type = Token.TokenType.VARIABLE; break;
+
+
+                }
             }
         }
+
+        System.out.println(buffer);
 
     }
+
+
 
     /**
      * Get the next token
@@ -198,7 +220,11 @@ public class Interpreter {
             case "brz" -> Token.TokenType.BRZ;
             case "brp" -> Token.TokenType.BRP;
             case "dat" -> Token.TokenType.DAT;
-            default -> Token.TokenType.LABEL;
+            default -> Token.TokenType.UNDEFINED;
         };
+    }
+
+    private static Token.TokenType isVariableOrLabel(String token) {
+        return Token.TokenType.LABEL;
     }
 }

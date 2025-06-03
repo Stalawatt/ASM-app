@@ -30,12 +30,12 @@ public class Instructions {
         Memory.setAcc(Memory.getAcc() - value);
     }
 
-    public static void LOAD(int location) {
-        Memory.setAcc(Memory.getMemoryLocation(location));
+    public static void LOAD(int value) {
+        Memory.setAcc(value);
     }
 
-    public static void STORE(int location) {
-        Memory.setMemoryLocation(location, Memory.getAcc());
+    public static void STORE(Token location) {
+        Interpreter.vars.put(location.getName(), Memory.getAcc());
     }
 
     public static void BRZ(int location) {

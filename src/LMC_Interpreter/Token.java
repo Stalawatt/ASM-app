@@ -4,7 +4,7 @@ class Token {
 
     TokenType type;
     Integer value;
-    String text;
+    String name;
 
 
     enum TokenType {
@@ -21,6 +21,8 @@ class Token {
         DAT,      // DATA STORAGE
         INT,      // INT GIVEN BY USER
         LABEL,    // LABEL
+        VARIABLE, // VARIABLE DEFINED VIA DAT BY USER
+        NEWLINE, // '\n' FOR NEW LINE
         UNDEFINED // FOR ERRORS
     }
 
@@ -28,20 +30,35 @@ class Token {
         this.type = type;
         this.value = null;
     }
-    public Token(TokenType type, int value, String text) {
+    public Token(TokenType type, int value) {
         this.type = type;
         this.value = value;
     }
+
+    public Token(TokenType type, String name) {
+        this.type = type;
+        this.name = name;
+    }
+
+
+
     public TokenType getType() {
         return type;
     }
 
     public Integer getValue() {
+        if (type == TokenType.VARIABLE) {
+            return Interpreter.vars.get(name);
+        }
+
+        if (type == TokenType.LABEL) {
+            return Interpreter.labels.get(name);
+        }
         return value;
     }
 
-    public String getText() {
-        return text;
+    public String getName() {
+        return name;
     }
 
     public int hashCode() {
