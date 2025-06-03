@@ -43,6 +43,8 @@ public class Instructions {
             Interpreter.pointer = location;
             Memory.setProgramCounter(location);
         }
+
+
     }
     public static void BRP(int location) {
         if (Memory.getAcc() >= 0) {
