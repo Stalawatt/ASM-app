@@ -123,13 +123,12 @@ public class Interpreter {
                 switch(buffer.get(i-1).getType()){
 
 
-                    case Token.TokenType.ADD, Token.TokenType.BRA, Token.TokenType.BRZ, Token.TokenType.BRP,
-                         Token.TokenType.SUB:
+                    case Token.TokenType.BRA, Token.TokenType.BRZ, Token.TokenType.BRP :
 
                         token.type = Token.TokenType.LABEL; break;
 
 
-                    case Token.TokenType.LDA, Token.TokenType.STA:
+                    case Token.TokenType.LDA, Token.TokenType.STA, Token.TokenType.ADD, Token.TokenType.SUB :
 
                         token.type = Token.TokenType.VARIABLE; break;
 
