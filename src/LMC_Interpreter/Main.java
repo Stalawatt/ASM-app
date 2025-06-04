@@ -2,16 +2,11 @@ package LMC_Interpreter;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        // Code sent here, for now just write here
+        // When GUI is ready, send the code from the user to this point
+        // WILL NEED TO RENAME/CREATE NEW CLASS FOR THIS
         String code = """ 
-                LDA 15
-                BRA END
-                LDA 2
-                STA HELLO
-                LDA 9
-                LDA HELLO
-                END OUT
-                HLT
-                HELLO DAT 69
+                
                 """;
         Interpreter.Run(code);
     }
