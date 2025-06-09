@@ -7,10 +7,11 @@ public class Window extends JFrame {
         super("ASM Application");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
-
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setVisible(true);
+
+
     }
 
     /**

@@ -1,6 +1,6 @@
 package LMC_Interpreter;
 
-class Token {
+public class Token {
 
     TokenType type;
     Integer value;

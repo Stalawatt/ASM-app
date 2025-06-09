@@ -66,7 +66,7 @@ public class Interpreter {
                 case Token.TokenType.INP -> Instructions.INP();
                 case Token.TokenType.OUT -> Instructions.OUT();
             }
-            pointer++;
+            incrementPointer();
         }
         System.exit(1);
     }
@@ -75,7 +75,7 @@ public class Interpreter {
      * Fill the buffer with tokens
      * @param code the string of LMC code
      */
-    private static void tokenize(String code) throws Exception {
+    private static void tokenize(String code)  {
 
         code = code.toLowerCase(); // lowercase the code so that it is usable in getTokenType()
 
@@ -155,13 +155,6 @@ public class Interpreter {
         return buffer.get(pointer + 1);
     }
 
-    private static Token peekBack() throws Exception {
-        if (pointer <= 0) {
-            return new Token(Token.TokenType.UNDEFINED);
-        }
-        return buffer.get(pointer - 1);
-    }
-
     /**
      * Sets the pointer
      * @param newPointer new pointer value
@@ -223,7 +216,4 @@ public class Interpreter {
         };
     }
 
-    private static Token.TokenType isVariableOrLabel(String token) {
-        return Token.TokenType.LABEL;
-    }
 }

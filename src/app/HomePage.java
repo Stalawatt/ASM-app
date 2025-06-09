@@ -35,6 +35,7 @@ public class HomePage extends Page {
     }
 
     private void loadButtons() {
+        // Load the button to send user to editor
         JButton editorButton = new JButton("Editor");
         editorButton.addActionListener(new ActionListener() {
 
