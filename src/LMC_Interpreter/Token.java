@@ -23,6 +23,7 @@ public class Token {
         LABEL,    // LABEL
         VARIABLE, // VARIABLE DEFINED VIA DAT BY USER
         NEWLINE, // '\n' FOR NEW LINE
+        COMMENT, // Starts a comment on that line
         UNDEFINED // FOR ERRORS
     }
 

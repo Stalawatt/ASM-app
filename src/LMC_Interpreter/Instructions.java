@@ -1,5 +1,7 @@
 package LMC_Interpreter;
 
+import Handlers.InputLock;
+
 /*
 Instructions :
 
@@ -16,11 +18,13 @@ BRP - branch if zero or positive
 DAT - data storage
 */
 
+import javax.swing.*;
 import java.util.Scanner;
 
 public class Instructions {
     public static void HALT() {
-        System.exit(0);
+        // Reset the interpreter
+        Interpreter.reset();
     }
     public static void ADD(int value) {
         Memory.setAcc(Memory.getAcc() + value);
@@ -59,13 +63,12 @@ public class Instructions {
     }
 
     public static void INP() {
-        System.out.println("Enter Value : ");
-        Memory.setAcc(Integer.parseInt(new Scanner(System.in).nextLine()));
+        Memory.setAcc(InputLock.waitForInput());
 
     }
 
-    public static void OUT() {
-        System.out.println(Memory.getAcc());
+    public static void OUT(JTextArea outputBox) {
+        outputBox.append(Memory.getAcc() + "\n");
     }
 
 

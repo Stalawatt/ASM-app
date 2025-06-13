@@ -1,5 +1,8 @@
 package LMC_Interpreter;
 
+import app.LMCEditor;
+
+import javax.swing.*;
 import java.util.*;
 
 /*
@@ -27,23 +30,27 @@ NEWLINE - end of an instruction
 public class Interpreter {
 
     // Stores the tokens
-    public static final List<Token> buffer = new ArrayList<>();
+    public static List<Token> buffer = new ArrayList<>();
     // Points to the current token
     public static int pointer = 0;
     // Points to the last token in the buffer
     private static int endPointer;
     // Hashmap for labels - Token Name -> Pointer
-    public static final HashMap<String, Integer> labels = new HashMap<>();
+    public static HashMap<String, Integer> labels = new HashMap<>();
     // Hashmap for variables - Token Name -> Value
-    public static final HashMap<String, Integer> vars = new HashMap<>();
+    public static HashMap<String, Integer> vars = new HashMap<>();
+    // Program halted
+    private static boolean isHalted = false;
 
 
     /**
      * Runs the interpreter
      * @param code The LMC code input string
      */
-    public static void Run(String code) throws Exception {
+    public static void Run(String code, JTextArea outputBox) throws Exception {
+        reset();
         pointer = 0;
+        isHalted = false;
         Memory.init();
         // Fill buffer with tokens
         tokenize(code);
@@ -52,7 +59,7 @@ public class Interpreter {
         // Set end pointer
         endPointer = buffer.size() - 1;
 
-        while (pointer < endPointer) {
+        while (pointer < endPointer && !isHalted) {
             Token token = buffer.get(pointer);
             switch (token.type) {
                 case Token.TokenType.HLT -> Instructions.HALT();
@@ -64,11 +71,10 @@ public class Interpreter {
                 case Token.TokenType.BRZ -> Instructions.BRZ(peek().getValue());
                 case Token.TokenType.BRP -> Instructions.BRP(peek().getValue());
                 case Token.TokenType.INP -> Instructions.INP();
-                case Token.TokenType.OUT -> Instructions.OUT();
+                case Token.TokenType.OUT -> Instructions.OUT(outputBox);
             }
             incrementPointer();
         }
-        System.exit(1);
     }
 
     /**
@@ -76,7 +82,7 @@ public class Interpreter {
      * @param code the string of LMC code
      */
     private static void tokenize(String code)  {
-
+        boolean isComment = false;
         code = code.toLowerCase(); // lowercase the code so that it is usable in getTokenType()
 
         // Tokenize all instr in passed code, other than the labels and variables
@@ -85,15 +91,32 @@ public class Interpreter {
                 Token nextToken = new Token(getTokenType(word));
                 // labels and variables are left as undefined for now, later categorised
                 // the word is saved into the token
+
+                if (isComment) {
+                    String[] splitLine = line.split(" ");
+                    if (word == splitLine[splitLine.length - 1]) {
+                        isComment = false;
+                    }else {
+                        continue;
+                    }
+                }
+
                 if (nextToken.type == Token.TokenType.UNDEFINED) {
                     nextToken.name = word;
                 }
 
+                // when a comment starts, just skip to the next newline and continue from there
+                if (nextToken.type == Token.TokenType.COMMENT) {
+                    isComment = true;
+                    continue;
+                }
 
                 // if is an INT token, then add the int value to the token
                 if (nextToken.getType() == Token.TokenType.INT) {
                     nextToken.value = Integer.parseInt(word);
                 }
+
+
 
                 buffer.add(nextToken);
 
@@ -105,15 +128,17 @@ public class Interpreter {
         for (int i = 0; i < buffer.size(); i++) {
             Token token = buffer.get(i);
             if (token.type == Token.TokenType.UNDEFINED) {
-                if (i == 0) {
+                if (i == 0 && !Objects.equals(token.name, "#")) {
                     token.type = Token.TokenType.LABEL;
                     labels.put(token.name, i);
                     continue;
                 }
 
-                if (buffer.get(i + 1).getType() == Token.TokenType.DAT && buffer.get(i + 2).getType() == Token.TokenType.INT) { // variable DAT value
+                if (buffer.get(i + 1).getType() == Token.TokenType.DAT) { // variable DAT value
                     token.type = Token.TokenType.VARIABLE;
-                    vars.put(token.name, buffer.get(i + 2).getValue());
+
+                        vars.put(token.name, buffer.get(i + 2).getType() == Token.TokenType.INT ? buffer.get(i + 2).getValue() : 0);
+
 
                 } else if (buffer.get(i - 1).getType() == Token.TokenType.NEWLINE) { // NEWLINE LABEL <other instr>
                     token.type = Token.TokenType.LABEL;
@@ -136,9 +161,6 @@ public class Interpreter {
                 }
             }
         }
-
-        System.out.println(buffer);
-
     }
 
 
@@ -180,14 +202,6 @@ public class Interpreter {
     }
 
     /**
-     * Resets the buffer and pointer
-     */
-    private static void resetBuffer() {
-        buffer.clear();
-        pointer = 0;
-    }
-
-    /**
      * Takes in a token string, and returns the token type
      * @param token The token string
      * @return the token type
@@ -212,8 +226,20 @@ public class Interpreter {
             case "brz" -> Token.TokenType.BRZ;
             case "brp" -> Token.TokenType.BRP;
             case "dat" -> Token.TokenType.DAT;
+            case "#" -> Token.TokenType.COMMENT;
             default -> Token.TokenType.UNDEFINED;
         };
+    }
+
+
+    public static void reset() {
+        pointer = 0;
+        endPointer = 1;
+        buffer.clear();
+        labels.clear();
+        vars.clear();
+        isHalted = true;
+
     }
 
 }
