@@ -30,51 +30,41 @@ public class LMCEditor {
     private void createUIComponents() {
 
         // Add the code input box
-        JTextArea codeInputArea = new JTextArea();
-        codeInputArea.setEditable(true);
-        codeInputArea.setLineWrap(true);
-        codeInputArea.setWrapStyleWord(true);
-        codeInputArea.setBounds(
-                15,
-                30,
-                400,
-                PageManager.percentOfScreen(100,80).height
-                );
-        codeInputArea.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.DARK_GRAY,3),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
+        JTextArea codeInputArea = getTextArea(15,30, 400, PageManager.percentOfScreen(100,80).height );
         content.add(codeInputArea);
 
-        // Label for the code input box
-        JLabel codeLabel = new JLabel("Your Code Here : ");
-        codeLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        Dimension codeLabelSize = codeLabel.getPreferredSize();
-        codeLabel.setBounds(25, 10, codeLabelSize.width, codeLabelSize.height);
-        codeLabel.setForeground(Color.WHITE);
-        content.add(codeLabel);
-
-
         // Output box
-        JTextArea outputArea = new JTextArea();
-        outputArea.setEditable(false);
-        outputArea.setLineWrap(true);
-        outputArea.setWrapStyleWord(true);
-        outputArea.setBounds(430, 30, 200, PageManager.percentOfScreen(100,40).height);
-        outputArea.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.DARK_GRAY,3),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-        outputArea.setFocusable(false);
+        JTextArea outputArea = getTextArea(430, 30, 200, PageManager.percentOfScreen(100,40).height );
         content.add(outputArea);
 
+        // User input box
+        JTextArea userInputArea = getTextArea(430, 60 + outputArea.getHeight(), 200, 33);
+        userInputArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "submit");
+        userInputArea.getActionMap().put("submit", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                InputLock.provideInput(userInputArea.getText().strip());
+                userInputArea.setText("");
+            }
+        });
+        content.add(userInputArea);
+
+        // Label for the code input box
+
+        JLabel codeLabel = getLabel(25, 10, "Your Code Here :");
+        content.add(codeLabel);
+
         // Label for output box
-        JLabel outputLabel = new JLabel("Output : ");
-        outputLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        Dimension outputLabelSize = outputLabel.getPreferredSize();
-        outputLabel.setBounds(435, 10, outputLabelSize.width, outputLabelSize.height);
-        outputLabel.setForeground(Color.WHITE);
+        JLabel outputLabel = getLabel(435, 10, "Output : ");
         content.add(outputLabel);
+
+        // User input label
+        JLabel userInputLabel = getLabel(435, userInputArea.getY() - 25,"User Input : ");
+        content.add(userInputLabel);
+
+        // Waiting for input label
+        JLabel waitingLabel = getLabel(445 + userInputLabel.getWidth(), userInputArea.getY() - 25, "Waiting");
+        waitingLabel.setForeground(Color.WHITE);
 
         // Run button
         JButton quickRunButton = new JButton("Run");
@@ -99,42 +89,6 @@ public class LMCEditor {
         });
         content.add(quickRunButton);
 
-        // User input box
-        JTextArea userInputArea = new JTextArea();
-        userInputArea.setEditable(true);
-        userInputArea.setLineWrap(true);
-        userInputArea.setWrapStyleWord(true);
-        userInputArea.setBounds(430, 60 + outputArea.getHeight(), 200, 33);
-        userInputArea.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.DARK_GRAY,3),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-        userInputArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "submit");
-        userInputArea.getActionMap().put("submit", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                InputLock.provideInput(userInputArea.getText().strip());
-                userInputArea.setText("");
-            }
-        });
-        content.add(userInputArea);
-
-        // User input label
-        JLabel userInputLabel = new JLabel("User Input : ");
-        userInputLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        Dimension userInputLabelSize = userInputLabel.getPreferredSize();
-        userInputLabel.setBounds(435, userInputArea.getY() - 25, userInputLabelSize.width, userInputLabelSize.height);
-        userInputLabel.setForeground(Color.WHITE);
-        content.add(userInputLabel);
-
-        // Waiting for input label
-        JLabel waitingLabel = new JLabel("Waiting");
-        waitingLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        Dimension waitingLabelSize = waitingLabel.getPreferredSize();
-        waitingLabel.setBounds(445 + userInputLabelSize.width, userInputArea.getY() - 25, waitingLabelSize.width, waitingLabelSize.height );
-        waitingLabel.setForeground(Color.WHITE);
-
-
         new Thread(() -> {
             while (true) {
                 Component[] components = content.getComponents();
@@ -152,7 +106,28 @@ public class LMCEditor {
         }).start();
 
 
+
+
+        // CPU ---------------------------------------------------------------------------------------------------
+
         // Create CPU outline
+        PolygonOutline cpuOutline = getCPUOutline(outputArea, userInputArea, codeInputArea);
+        content.add(cpuOutline);
+
+        /* NEEDED
+        *
+        * Registers :
+        *   Program Counter Register
+        *   Accumulator
+        *
+        *
+        * Memory :
+        *   100 Locations
+        *   
+        * */
+    }
+
+    private static PolygonOutline getCPUOutline(JTextArea outputArea, JTextArea userInputArea, JTextArea codeInputArea) {
         int[] xPoints = {
                 outputArea.getX() + outputArea.getWidth() + 20,
                 outputArea.getX() + outputArea.getWidth() + 220,
@@ -177,6 +152,36 @@ public class LMCEditor {
         Dimension cpuOutlineSize = cpuOutline.getPreferredSize();
         cpuOutline.setOpaque(false);
         cpuOutline.setBounds(0,0,1920,1080);
-        content.add(cpuOutline);
+        return cpuOutline;
     }
+
+    private static JTextArea getTextArea(int x, int y, int width, int height) {
+
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(true);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setBounds(
+                x,
+                y,
+                width,
+                height
+        );
+        textArea.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.DARK_GRAY,3),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        return textArea;
+    }
+
+    private static JLabel getLabel(int x, int y, String text) {
+        JLabel Label = new JLabel(text);
+        Label.setFont(new Font("Arial", Font.PLAIN, 15));
+        Dimension LabelSize = Label.getPreferredSize();
+        Label.setBounds(x, y, LabelSize.width, LabelSize.height);
+        Label.setForeground(Color.WHITE);
+        return Label;
+    }
+
+
 }
