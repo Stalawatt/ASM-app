@@ -35,6 +35,8 @@ public class LMCEditor {
 
         // Output box
         JTextArea outputArea = getTextArea(430, 30, 200, PageManager.percentOfScreen(100,40).height );
+        outputArea.setEditable(false);
+        outputArea.setFocusable(false);
         content.add(outputArea);
 
         // User input box
@@ -120,11 +122,131 @@ public class LMCEditor {
         *   Program Counter Register
         *   Accumulator
         *
+        *   current instr reg
+        *   mem addr reg
+        *   dat addr reg
+        *
         *
         * Memory :
-        *   100 Locations
+        *   100 Locations - numbered 0 to 99
         *   
         * */
+
+        // Registers
+
+        // Label showing where registers are
+
+        JLabel registersLabel = getLabel(outputArea.getX() + outputArea.getWidth() + 85, outputArea.getY() + 10, "Registers");
+        registersLabel.setAlignmentX(getCentredComponentFromPoints(registersLabel,outputArea.getX() + outputArea.getWidth() + 20,outputArea.getX() + outputArea.getWidth() + 220 ));
+        content.add(registersLabel);
+
+        // PC register
+        JTextArea programCounterRegisterArea = getTextArea(outputArea.getX() + outputArea.getWidth() + 45, outputArea.getY() + 60, 150, 33);
+        programCounterRegisterArea.setBounds(
+                getCentredComponentFromPoints(programCounterRegisterArea, outputArea.getX() + outputArea.getWidth() + 20,outputArea.getX() + outputArea.getWidth() + 220),
+                programCounterRegisterArea.getY(),
+                programCounterRegisterArea.getWidth(),
+                programCounterRegisterArea.getHeight()
+        );
+        programCounterRegisterArea.setEditable(false);
+        programCounterRegisterArea.setFocusable(false);
+        content.add(programCounterRegisterArea);
+
+        // Label for PC register
+        JLabel programCounterRegisterLabel = getLabel(0, programCounterRegisterArea.getY() - 20, "Program Counter"); // to be moved in X to be centred above the textarea
+        programCounterRegisterLabel.setBounds(
+                getCentredXFromTextArea(programCounterRegisterArea) - programCounterRegisterLabel.getPreferredSize().width / 2, // Centre in X
+                programCounterRegisterLabel.getY(),
+                programCounterRegisterLabel.getPreferredSize().width,
+                programCounterRegisterLabel.getPreferredSize().height
+                );
+        content.add(programCounterRegisterLabel);
+
+
+
+        // CIR
+
+        JTextArea currentInstructionRegisterTextArea = getTextArea(0, programCounterRegisterArea.getY() + programCounterRegisterArea.getHeight() + 30, 150, 33);
+        currentInstructionRegisterTextArea.setBounds(
+                getCentredComponentFromPoints(currentInstructionRegisterTextArea, outputArea.getX() + outputArea.getWidth() + 20,outputArea.getX() + outputArea.getWidth() + 220),
+                currentInstructionRegisterTextArea.getY(),
+                currentInstructionRegisterTextArea.getWidth(),
+                currentInstructionRegisterTextArea.getHeight()
+                ); // centre in the cpu register area
+        currentInstructionRegisterTextArea.setEditable(false);
+        currentInstructionRegisterTextArea.setFocusable(false);
+        content.add(currentInstructionRegisterTextArea);
+
+        // CIR LABEL
+
+        JLabel currentInstructionRegisterLabel = getLabel(0, currentInstructionRegisterTextArea.getY() - 20, "Current Instruction Register");
+        currentInstructionRegisterLabel.setBounds(
+                getCentredXFromTextArea(currentInstructionRegisterTextArea) - currentInstructionRegisterLabel.getPreferredSize().width / 2, // Centre in X
+                currentInstructionRegisterLabel.getY(),
+                currentInstructionRegisterLabel.getPreferredSize().width,
+                currentInstructionRegisterLabel.getPreferredSize().height
+        );
+        content.add(currentInstructionRegisterLabel);
+
+
+
+        // MAR text area
+
+        JTextArea memoryAddressRegisterTextArea = getTextArea(0, currentInstructionRegisterTextArea.getY() + currentInstructionRegisterTextArea.getHeight() + 30, 150, 33);
+        memoryAddressRegisterTextArea.setBounds(
+                getCentredComponentFromPoints(memoryAddressRegisterTextArea, outputArea.getX() + outputArea.getWidth() + 20,outputArea.getX() + outputArea.getWidth() + 220),
+                memoryAddressRegisterTextArea.getY(),
+                memoryAddressRegisterTextArea.getWidth(),
+                memoryAddressRegisterTextArea.getHeight()
+        ); // centre in the cpu register area
+        memoryAddressRegisterTextArea.setEditable(false);
+        memoryAddressRegisterTextArea.setFocusable(false);
+        content.add(memoryAddressRegisterTextArea);
+
+        // MAR label
+
+        JLabel memoryAddressRegisterLabel = getLabel(0, memoryAddressRegisterTextArea.getY() - 20, "Memory Address Register");
+        memoryAddressRegisterLabel.setBounds(
+                getCentredXFromTextArea(memoryAddressRegisterTextArea) - memoryAddressRegisterLabel.getPreferredSize().width / 2, // Centre in X
+                memoryAddressRegisterLabel.getY(),
+                memoryAddressRegisterLabel.getPreferredSize().width,
+                memoryAddressRegisterLabel.getPreferredSize().height
+        );
+        content.add(memoryAddressRegisterLabel);
+
+        // MDR text area
+
+        JTextArea memoryDataRegisterTextArea = getTextArea(0, memoryAddressRegisterTextArea.getY() + memoryAddressRegisterTextArea.getHeight() + 30, 150, 33);
+        memoryDataRegisterTextArea.setBounds(
+                getCentredComponentFromPoints(memoryDataRegisterTextArea, outputArea.getX() + outputArea.getWidth() + 20,outputArea.getX() + outputArea.getWidth() + 220),
+                memoryDataRegisterTextArea.getY(),
+                memoryDataRegisterTextArea.getWidth(),
+                memoryDataRegisterTextArea.getHeight()
+        ); // centre in the cpu register area
+        memoryDataRegisterTextArea.setEditable(false);
+        memoryDataRegisterTextArea.setFocusable(false);
+        content.add(memoryDataRegisterTextArea);
+
+        // MDR label
+
+        JLabel memoryDataRegisterLabel = getLabel(0, memoryDataRegisterTextArea.getY() - 20, "Memory Data Register");
+        memoryDataRegisterLabel.setBounds(
+                getCentredXFromTextArea(memoryAddressRegisterTextArea) - memoryDataRegisterLabel.getPreferredSize().width / 2, // Centre in X
+                memoryDataRegisterLabel.getY(),
+                memoryDataRegisterLabel.getPreferredSize().width,
+                memoryDataRegisterLabel.getPreferredSize().height
+        );
+        content.add(memoryDataRegisterLabel);
+
+
+
+        // Accumulator text area
+
+    
+
+
+
+
     }
 
     private static PolygonOutline getCPUOutline(JTextArea outputArea, JTextArea userInputArea, JTextArea codeInputArea) {
@@ -149,7 +271,6 @@ public class LMCEditor {
         int nPoints = 6;
 
         PolygonOutline cpuOutline = new PolygonOutline(xPoints, yPoints, nPoints, Color.WHITE);
-        Dimension cpuOutlineSize = cpuOutline.getPreferredSize();
         cpuOutline.setOpaque(false);
         cpuOutline.setBounds(0,0,1920,1080);
         return cpuOutline;
@@ -181,6 +302,17 @@ public class LMCEditor {
         Label.setBounds(x, y, LabelSize.width, LabelSize.height);
         Label.setForeground(Color.WHITE);
         return Label;
+    }
+
+    private static int getCentredXFromTextArea(JTextArea panel) {
+        return panel.getX() + panel.getWidth() / 2;
+    }
+
+
+
+    private static <T extends JComponent> int getCentredComponentFromPoints(T component, int x1, int x2) {
+        int halfComponentWidth = component.getWidth() / 2;
+        return ((x1 + x2) / 2) - halfComponentWidth;
     }
 
 
