@@ -1,5 +1,7 @@
 package LMC_Interpreter;
 
+import app.LMCEditor;
+
 public class Memory {
 
 
@@ -53,6 +55,7 @@ public class Memory {
     }
     public static void setAcc(int acc) {
         ACC = acc;
+        LMCEditor.setAccReg(acc);
     }
 
     public static void fill() {

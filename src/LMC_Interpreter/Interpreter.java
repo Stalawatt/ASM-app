@@ -1,5 +1,6 @@
 package LMC_Interpreter;
 
+import Handlers.TickHandler;
 import app.LMCEditor;
 
 import javax.swing.*;
@@ -42,6 +43,7 @@ public class Interpreter {
     // Program halted
     private static boolean isHalted = false;
 
+    private static TickHandler tickHandler = new TickHandler();
 
     /**
      * Runs the interpreter
@@ -59,7 +61,13 @@ public class Interpreter {
         // Set end pointer
         endPointer = buffer.size() - 1;
 
+        new Thread(() -> tickHandler.start()).start();
+
+
         while (pointer < endPointer && !isHalted) {
+
+            tickHandler.waitTick();
+
             Token token = buffer.get(pointer);
             switch (token.type) {
                 case Token.TokenType.HLT -> Instructions.HALT();
