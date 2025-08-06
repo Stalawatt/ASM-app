@@ -3,6 +3,7 @@ package app;
 import LMC_Interpreter.Interpreter;
 import Handlers.InputLock;
 import Objects.PolygonOutline;
+import Popup.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,13 +12,12 @@ import java.util.Arrays;
 
 public class LMCEditor {
 
-    private final JPanel content;
-    private final static JTextArea[] memoryBoxesArray = new JTextArea[100];
+    public static final JPanel content = new JPanel();
+    public final static JTextArea[] memoryBoxesArray = new JTextArea[100];
 
     private static JTextArea accumulatorTextArea;
 
     public LMCEditor(Dimension screenSize) {
-        content = new JPanel();
         content.setSize(screenSize);
         content.setBounds(0, 0, screenSize.width , screenSize.height);
         content.setBackground(Color.BLACK);
@@ -38,6 +38,7 @@ public class LMCEditor {
 
         // Output box
         JTextArea outputArea = getTextArea(430, 30, 200, PageManager.percentOfScreen(100,40).height );
+        outputArea.setName("outputArea");
         outputArea.setEditable(false);
         outputArea.setFocusable(false);
         content.add(outputArea);
@@ -86,7 +87,10 @@ public class LMCEditor {
             new Thread(() -> {
                 try {
                     outputArea.setText("");
-                    Interpreter.Run(codeInputArea.getText(), outputArea);
+                    content.revalidate();
+                    content.repaint();
+
+                    Interpreter.Run(codeInputArea.getText());
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -109,6 +113,8 @@ public class LMCEditor {
                 }
             }
         }).start();
+
+
 
 
 

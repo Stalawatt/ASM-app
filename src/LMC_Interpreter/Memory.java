@@ -1,5 +1,6 @@
 package LMC_Interpreter;
 
+import Handlers.TokenType;
 import app.LMCEditor;
 
 public class Memory {
@@ -7,7 +8,7 @@ public class Memory {
 
 
     // 100 memory locations from 0 to 99
-    public static int[] RAM = new int[100];
+    public static RAM memory;
 
     // Output from ALU
     private static int ACC = 0;
@@ -17,17 +18,12 @@ public class Memory {
     private static int instrReg = 0;
     private static int programCounter = 0;
 
-    public static void init() {
-        for (int i = 0; i < 100; i++) {
-            RAM[i] = 0;
-        }
-    }
 
     public static void setMemoryLocation(int index, int value) {
-        RAM[index] = value;
+        memory.setMemoryValue(index,value);
     }
     public static int getMemoryLocation(int index) {
-        return RAM[index];
+        return memory.getMemoryValue(index);
     }
     public static int getAddrReg() {
         return addrReg;
@@ -61,13 +57,21 @@ public class Memory {
     public static void fill() {
         try {
             for (int i = 0; i < 100; i++) {
+
+                // Ensure any non-instruction is not loaded to memory
+                switch (Interpreter.buffer.get(i).type) {
+                    case TokenType.NEWLINE, TokenType.INT, TokenType.LABEL, TokenType.COMMENT,
+                         TokenType.VARIABLE, TokenType.UNDEFINED, TokenType.DAT -> {
+                        continue;
+                    }
+                }
                 Token currToken = Interpreter.buffer.get(i);
                 Token nextToken = Interpreter.buffer.get(i + 1);
 
-                RAM[i] = toMachineCode(currToken, nextToken);
+                memory.setMemoryValue(i,toMachineCode(currToken, nextToken));
             }
         } catch (Exception e) {
-            // End of program
+            //
         }
     }
 
@@ -88,15 +92,15 @@ public class Memory {
         DAT - None
      */
         return switch (token.type) {
-            case Token.TokenType.ADD -> 100 + nextToken.getValue();
-            case Token.TokenType.SUB -> 200 + nextToken.getValue();
-            case Token.TokenType.STA -> 300 + nextToken.getValue();
-            case Token.TokenType.LDA -> 500 + nextToken.getValue();
-            case Token.TokenType.BRA -> 600 + nextToken.getValue();
-            case Token.TokenType.BRZ -> 700 + nextToken.getValue();
-            case Token.TokenType.BRP -> 800 + nextToken.getValue();
-            case Token.TokenType.INP -> 901;
-            case Token.TokenType.OUT -> 902;
+            case TokenType.ADD -> 100 + nextToken.getValue();
+            case TokenType.SUB -> 200 + nextToken.getValue();
+            case TokenType.STA -> 300 + nextToken.getValue();
+            case TokenType.LDA -> 500 + nextToken.getValue();
+            case TokenType.BRA -> 600 + nextToken.getValue();
+            case TokenType.BRZ -> 700 + nextToken.getValue();
+            case TokenType.BRP -> 800 + nextToken.getValue();
+            case TokenType.INP -> 901;
+            case TokenType.OUT -> 902;
             default -> 0;
         };
 
