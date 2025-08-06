@@ -32,8 +32,8 @@ public class CodeErrorMessage {
 
         // Add the text area to display the error message
         textPane = new JTextPane();
-        textPane.setBounds(250,100,500,250);
-        textPane.setBorder(BorderFactory.createEmptyBorder(100,100,100,100));
+        textPane.setBounds(250,100,500,300);
+        textPane.setBorder(BorderFactory.createEmptyBorder(20,100,100,100));
         StyledDocument doc = textPane.getStyledDocument(); // centre the text
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);

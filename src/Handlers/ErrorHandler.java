@@ -19,7 +19,7 @@ public class ErrorHandler {
     }
 
     public static void showError(ErrorCode errorCode, int lineNum) {
-        CodeErrorMessage message = new CodeErrorMessage("Error : %s \n\n %s ".formatted(
+        CodeErrorMessage message = new CodeErrorMessage("Error : %s \n\n %s \nLine number : %s".formatted(
                 errorCode.toString(),
                 errorDialogue.get(errorCode),
                 Integer.toString(lineNum)));
