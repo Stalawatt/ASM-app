@@ -22,9 +22,5 @@ bin/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
-.idea/artifacts/ASM_app_jar.xml
+## Networking IP ##
+src/net/ip.txt
