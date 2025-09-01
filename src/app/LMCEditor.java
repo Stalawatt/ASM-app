@@ -8,6 +8,8 @@ import Popup.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.*;
 import java.util.Arrays;
 
 public class LMCEditor {
@@ -73,15 +75,10 @@ public class LMCEditor {
         waitingLabel.setForeground(Color.WHITE);
 
         // Run button
-        JButton quickRunButton = new JButton("Run");
-        quickRunButton.setFont(new Font("Arial", Font.PLAIN, 20));
-        Dimension quickRunButtonSize = quickRunButton.getPreferredSize();
-        int quickRunButtonYCoord = 30 + codeInputArea.getHeight() + 10;
-        quickRunButton.setBounds(20, quickRunButtonYCoord, 195, quickRunButtonSize.height);
-        quickRunButton.setForeground(Color.WHITE);
-        quickRunButton.setBackground(Color.BLACK);
-        quickRunButton.setBorder(BorderFactory.createLineBorder(Color.GREEN,2));
-        quickRunButton.setFocusPainted(false);
+        JButton quickRunButton = getButton("Run", 20, 30 + codeInputArea.getHeight() + 10,
+                20, 195, 50, Color.GREEN, Color.BLACK, Color.WHITE);
+        content.add(quickRunButton);
+
         quickRunButton.addActionListener(_ -> {
             // Quickly run the interpreter
             new Thread(() -> {
@@ -114,6 +111,34 @@ public class LMCEditor {
             }
         }).start();
 
+
+        // Documentation link button
+
+        JButton docsButton = getButton("Docs", 15, quickRunButton.getY() + quickRunButton.getHeight() + 20,
+                0, 50, 40, Color.GRAY, Color.WHITE, Color.BLACK);
+        docsButton.setBounds(getCentredComponentFromPoints(docsButton, quickRunButton.getX(), quickRunButton.getX() + quickRunButton.getWidth()/2) - docsButton.getX(),
+                docsButton.getY(), docsButton.getWidth(), docsButton.getHeight());
+        docsButton.addActionListener(_ -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://docs.google.com/document/d/115OnWfxtnMz4nQYrTGs6Xes5hsJA7TR-DTRO6YIY-gU/edit?tab=t.0"));
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        content.add(docsButton);
+
+        JButton reportButton = getButton("Report", 15, quickRunButton.getY() + quickRunButton.getHeight() + 20,
+                0, 50, 40, Color.GRAY, Color.WHITE, Color.BLACK);
+        reportButton.setBounds(getCentredComponentFromPoints(reportButton, quickRunButton.getX() + quickRunButton.getWidth()/2, quickRunButton.getX() + quickRunButton.getWidth()) + reportButton.getX(),
+                reportButton.getY(), reportButton.getWidth(), reportButton.getHeight());
+        reportButton.addActionListener(_ -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://docs.google.com/forms/d/e/1FAIpQLSdSC25nqOUNYX5rfgC_dgEE5e5U199FVY8W1p0woNwGBIPL4A/viewform?usp=preview"));
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        content.add(reportButton);
 
 
 
@@ -373,6 +398,17 @@ public class LMCEditor {
 
     private static int getCentredXFromTextArea(JTextArea panel) {
         return panel.getX() + panel.getWidth() / 2;
+    }
+
+    private static JButton getButton(String text, int fontSize, int YCoord, int XCoord, int Width, int Height, Color BorderColor, Color BackgroundColor, Color TextColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.PLAIN, fontSize));
+        button.setBounds(XCoord, YCoord, Width, Height);
+        button.setForeground(TextColor);
+        button.setBackground(BackgroundColor);
+        button.setBorder(BorderFactory.createLineBorder(BorderColor,2));
+        button.setFocusPainted(false);
+        return button;
     }
 
 
