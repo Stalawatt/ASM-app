@@ -1,7 +1,9 @@
 package app;
 
+import Handlers.ProgramCounter;
 import LMC_Interpreter.Interpreter;
 import Handlers.InputLock;
+import LMC_Interpreter.Memory;
 import Objects.PolygonOutline;
 import Popup.*;
 
@@ -95,22 +97,6 @@ public class LMCEditor {
         });
         content.add(quickRunButton);
 
-        new Thread(() -> {
-            while (true) {
-                Component[] components = content.getComponents();
-                boolean hasLabel = Arrays.asList(components).contains(waitingLabel);
-                if (InputLock.isWaiting && !hasLabel ) {
-                    content.add(waitingLabel);
-                    content.revalidate();
-                    content.repaint();
-                } else if (!InputLock.isWaiting && hasLabel) {
-                    content.remove(waitingLabel);
-                    content.revalidate();
-                    content.repaint();
-                }
-            }
-        }).start();
-
 
         // Documentation link button
 
@@ -176,6 +162,7 @@ public class LMCEditor {
 
         // PC register
         JTextArea programCounterRegisterArea = getTextArea(outputArea.getX() + outputArea.getWidth() + 45, outputArea.getY() + 60, 150, 33);
+        programCounterRegisterArea.setName("ProgramCounterRegister");
         programCounterRegisterArea.setBounds(
                 getCentredComponentFromPoints(programCounterRegisterArea, outputArea.getX() + outputArea.getWidth() + 20,outputArea.getX() + outputArea.getWidth() + 220),
                 programCounterRegisterArea.getY(),
@@ -337,6 +324,31 @@ public class LMCEditor {
         content.add(memorySectLabel);
 
 
+        // Thread checking and updating the components
+        new Thread(() -> {
+            while (true) {
+                Component[] components = content.getComponents();
+                boolean hasLabel = Arrays.asList(components).contains(waitingLabel);
+                if (InputLock.isWaiting && !hasLabel ) {
+                    content.add(waitingLabel);
+                    content.revalidate();
+                    content.repaint();
+                } else if (!InputLock.isWaiting && hasLabel) {
+                    content.remove(waitingLabel);
+                    content.revalidate();
+                    content.repaint();
+                }
+
+                if (!programCounterRegisterArea.getText().equals(String.valueOf(Handlers.ProgramCounter.getValue()))) {
+                    programCounterRegisterArea.setText(String.valueOf(Handlers.ProgramCounter.getValue()));
+                }
+
+                if (!currentInstructionRegisterTextArea.getText().equals(String.valueOf(Memory.getMemoryLocation(ProgramCounter.getValue())))) {
+                    currentInstructionRegisterTextArea.setText(String.valueOf(Memory.getMemoryLocation(ProgramCounter.getValue())));
+                }
+
+            }
+        }).start();
 
 
     }

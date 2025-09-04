@@ -8,7 +8,7 @@ public class Memory {
 
 
     // 100 memory locations from 0 to 99
-    public static RAM memory;
+    public static RAM memory = new RAM(LMCEditor.memoryBoxesArray);;
 
     // Output from ALU
     private static int ACC = 0;

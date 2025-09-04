@@ -1,9 +1,6 @@
 package LMC_Interpreter;
 
-import Handlers.ErrorCode;
-import Handlers.ErrorHandler;
-import Handlers.Information;
-import Handlers.TokenType;
+import Handlers.*;
 import app.LMCEditor;
 
 import javax.swing.*;
@@ -49,45 +46,71 @@ public class Interpreter {
     // Hashmap for variables - Token Name -> Value
     public static HashMap<String, Integer> vars = new HashMap<>();
     // Program halted
-    private static boolean isHalted = false;
+    public static boolean isHalted = false;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public static final JPanel editorPage = LMCEditor.content;
+    public static JTextArea programCounterTextArea = null;
     private static JTextArea outputBox;
 
 
     // wait time from tickspeed is found by 1000ms/tickspeed to find the tps
-    public static int tickSpeed = 20;
+    public static int tickSpeed = 1;
+
+    private static void init() {
+        // get the program counter
+        for (Component c : editorPage.getComponents()) {
+            try{
+                if (c.getName().equals("ProgramCounterRegister")) {
+                    programCounterTextArea = (JTextArea) c;
+                }} catch (Exception e) {
+                //
+            }
+        }
+        // init the memory array
+        Memory.memory = new RAM(LMCEditor.memoryBoxesArray);
+        // Get the output area
+        for (Component c : editorPage.getComponents()) {
+            try{
+                if (c.getName().equals("outputArea")) {
+                    outputBox = (JTextArea) c;
+                }} catch (Exception e) {
+                //
+            }
+        }
+        reset();
+        ProgramCounter.setValue(0);
+        Memory.setAcc(0);
+        // starting points
+        pointer = 0;
+        isHalted = false;
+
+    }
+
+
+
     /**
      * Runs the interpreter
      * @param code The LMC code input string
      */
     public static void Run(String code) {
-        Memory.memory = new RAM(LMCEditor.memoryBoxesArray);
-        for (Component c : editorPage.getComponents()) {
-            try{
-            if (c.getName().equals("outputArea")) {
-                outputBox = (JTextArea) c;
-            }} catch (Exception e) {
-                //
-            }
-        }
-        reset();
-        pointer = 0;
-        isHalted = false;
+
+        init();
+
         // Fill buffer with tokens
         ErrorCode returnCode = tokenize(code); // Get the return code from tokenization
         if (returnCode == ErrorCode.SuccessCode); // Great success! Do not send error message
         else { // Not great success :( send error message
              ErrorHandler.showError(returnCode, -1);
         }
-        // Fill memory
-        Memory.fill();
+
         // Set end pointer
         endPointer = buffer.size() - 1;
+        // Fill memory
+        Memory.fill();
 
-
-        if (ErrorHandler.scanForErrors()) executor.scheduleAtFixedRate(() -> {
+        // Ensure no errors then continue to run, returns true if no errors
+        if (ErrorHandler.scanForErrors()) executor.scheduleWithFixedDelay(() -> {
             try {
                 if (pointer < endPointer && !isHalted) executeToken();
             } catch (Exception e) {
@@ -220,17 +243,8 @@ public class Interpreter {
         pointer = newPointer;
     }
 
-    /**
-     * Increments the pointer
-     * @throws Exception if next pointer exceeds end pointer
-     */
-    private static void incrementPointer() throws Exception {
-        if (pointer + 1 > endPointer) {
-            throw new Exception("End pointer exceeded in nextPointer");
-        }
-        Memory.incrementProgramCounter();
-        pointer++;
-    }
+
+
 
     /**
      * Takes in a token string, and returns the token type
@@ -272,6 +286,7 @@ public class Interpreter {
         vars.clear();
         isHalted = true;
 
+
     }
 
     private static void executeToken() throws Exception {
@@ -288,12 +303,28 @@ public class Interpreter {
             case TokenType.INP -> Instructions.INP();
             case TokenType.OUT -> Instructions.OUT(outputBox);
         }
-        incrementPointer();
+        updatePointer(pointer + 1);
     }
 
     public static void setTickspeed(int tps) {
         tickSpeed = tps;
     }
 
+    /**
+     * Updates the pointer to the new passed pointer
+     * @throws Exception if next pointer exceeds end pointer
+     */
+    public static void updatePointer(int newPointer) throws Exception {
+        if (newPointer > endPointer) {
+            throw new Exception("End pointer exceeded in nextPointer");
+        }
+        pointer = newPointer;
+    }
+
+    public static void updateProgramCounter(int newProgramCounter) throws Exception {
+        Memory.setProgramCounter(newProgramCounter);
+        ProgramCounter.setValue(newProgramCounter);
+        programCounterTextArea.setText(String.valueOf(Memory.getProgramCounter()));
+    }
 
 }
