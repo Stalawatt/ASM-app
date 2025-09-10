@@ -76,6 +76,7 @@ public class LMCEditor {
         JLabel waitingLabel = getLabel(445 + userInputLabel.getWidth(), userInputArea.getY() - 25, "Waiting");
         waitingLabel.setForeground(Color.WHITE);
 
+
         // Run button
         JButton quickRunButton = getButton("Run", 20, 30 + codeInputArea.getHeight() + 10,
                 20, 195, 50, Color.GREEN, Color.BLACK, Color.WHITE);
@@ -127,6 +128,32 @@ public class LMCEditor {
         content.add(reportButton);
 
 
+        // Create a TPS slider to control how fast it runs
+
+        final int tpsMin = 1;
+        final int tpsMax = 5;
+        final int tpsStep = 1;
+        JSlider tpsSlider = new JSlider(JSlider.HORIZONTAL, tpsMin, tpsMax, tpsStep);
+        tpsSlider.setMajorTickSpacing(2);
+        tpsSlider.setMinorTickSpacing(tpsStep);
+        tpsSlider.setPaintTicks(true);
+        tpsSlider.setPaintLabels(true);
+        tpsSlider.addChangeListener(e -> {
+           // On changing the sliders position (aka changing tps)
+            Interpreter.tickSpeed = tpsSlider.getValue();
+        });
+        tpsSlider.setBounds(quickRunButton.getX() + quickRunButton.getWidth() + 15, codeInputArea.getY() + codeInputArea.getHeight() + 30,
+                codeInputArea.getWidth()/2 - 20, 40);
+        tpsSlider.setForeground(Color.WHITE);
+        tpsSlider.setBackground(Color.BLACK);
+        content.add(tpsSlider);
+
+        // Tps slider label
+        JLabel tpsSliderLabel = getLabel(tpsSlider.getX(), tpsSlider.getY() - 20, "Instruction Run Speed");
+        tpsSliderLabel.setForeground(Color.WHITE);
+        tpsSliderLabel.setBackground(Color.BLACK);
+        tpsSliderLabel.setBounds(getCentredComponentFromPoints(tpsSliderLabel, tpsSlider.getX(), tpsSlider.getX() + tpsSlider.getWidth()),tpsSliderLabel.getY(), tpsSliderLabel.getPreferredSize().width, tpsSliderLabel.getPreferredSize().height);
+        content.add(tpsSliderLabel);
 
 
 
